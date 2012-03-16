@@ -1,4 +1,12 @@
-from graph import graph
+from graph import graph,graph_shapes
+from time import time
+
+def dijkstra_all(g):
+    # Helper for iterative all-pairs shortest path using dijkstra's
+    distances=[]
+    for i in range(len(g)):
+        distances.append(dijkstra(g,i))
+    return distances
 
 def dijkstra(g,source):
     result=list(g[source])
@@ -7,45 +15,48 @@ def dijkstra(g,source):
     #iterate over all nodes
     for q in range(len(result)):
         lowestDist=min(remaining)
+        if(lowestDist==float('inf')):
+            # no need to proceed if all remaining distances are inf
+            break
         nodeIdWithLowestDist=remaining.index(lowestDist)
         remaining[nodeIdWithLowestDist]=''
-
         for distance,iter in zip(g[nodeIdWithLowestDist],range(len(result))):
             if distance+lowestDist < result[iter]:
                 result[iter]=distance+lowestDist
                 assert(remaining[iter]!='')
                 remaining[iter]=distance+lowestDist
-        print 'result=',result
-        print 'remaining=',remaining
 
     return result
             
 if __name__=="__main__":
-    #Unit tests or dijkstra function
-    g=graph(16).matrix
+    inf=float('inf')
+
+    # Unit tests or dijkstra function
+
+    # Visual test of random graph
+    g=graph(5,shape=graph_shapes.RANDOM).matrix
     print g
-    distances=[]
-    for i in range(len(g)):
-        distances.append(dijkstra(g,i))
-    print distances
+    print dijkstra_all(g) 
 
-    distances=[]
+    # Various automated tests
     g1=[[0,1,1,5,5],[1,0,5,1,5],[1,5,0,5,1],[5,1,5,0,1],[5,5,1,1,0]]
-    for i in range(len(g1)):
-        distances.append(dijkstra(g1,i))
-    assert(distances==[[0,1,1,2,2],[1,0,2,1,2],[1,2,0,2,1],[2,1,2,0,1],[2,2,1,1,0]])
+    assert(dijkstra_all(g1)==[[0,1,1,2,2],[1,0,2,1,2],[1,2,0,2,1],[2,1,2,0,1],[2,2,1,1,0]])
 
-    distances=[]
     g2=[[0,1,1,5,5],[1,0,5,1,5],[1,5,0,5,5],[5,1,5,0,1],[5,5,5,1,0]]
-    for i in range(len(g2)):
-        distances.append(dijkstra(g2,i))
-    assert(distances==[[0,1,1,2,3],[1,0,2,1,2],[1,2,0,3,4],[2,1,3,0,1],[3,2,4,1,0]])
+    assert(dijkstra_all(g2)==[[0,1,1,2,3],[1,0,2,1,2],[1,2,0,3,4],[2,1,3,0,1],[3,2,4,1,0]])
  
-    distances=[]
     g3=[[0,1,1,5,2],[1,0,5,4,5],[1,5,0,5,5],[5,4,5,0,1],[2,5,5,1,0]]
-    print g3
-    for i in range(len(g3)):
-        distances.append(dijkstra(g3,i))
-    print distances
-    assert(distances==[[0,1,1,3,2],[1,0,2,4,3],[1,2,0,4,3],[3,4,4,0,1],[2,3,3,1,0]])
+    assert(dijkstra_all(g3)==[[0,1,1,3,2],[1,0,2,4,3],[1,2,0,4,3],[3,4,4,0,1],[2,3,3,1,0]])
 
+    g4=[[0,inf,5,inf,1],[inf,0,inf,inf,inf],[5,inf,0,inf,1],[inf,inf,inf,0,5],[1,inf,1,5,0]]
+    assert(dijkstra_all(g4)==\
+        [[0,inf,2,6,1],[inf,0,inf,inf,inf],[2,inf,0,6,1],[6,inf,6,0,5],[1,inf,1,5,0]])
+
+    # Large input test
+    g_big=graph(300,shape=graph_shapes.TWO).matrix
+
+    timeA=time()
+    dijkstra_all(g_big)
+    timeB=time()
+
+    print "Time taken on big input: ", timeB-timeA, " seconds."
