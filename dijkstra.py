@@ -1,27 +1,39 @@
+# Created by Marcin Wilk - BSD License
+
 from graph import graph,graph_shapes
 from time import time
 
 def dijkstra_all(g):
-    # Helper for iterative all-pairs shortest path using dijkstra's
+    """
+    Helper for iterative all-pairs shortest path using dijkstra's
+    """
     distances=[]
     for i in range(len(g)):
         distances.append(dijkstra(g,i))
     return distances
 
 def dijkstra(g,source):
+    """
+    Iterative dijkstra's shortest path algorithm
+    """
     result=list(g[source])
     remaining=list(result)
 
-    #iterate over all nodes
+    # Iterate q times, where q is number of nodes in graph
     for q in range(len(result)):
+        # Get shortest path not yet included in result
         lowestDist=min(remaining)
         if(lowestDist==float('inf')):
-            # no need to proceed if all remaining distances are inf
+            # No need to proceed if all remaining distances are inf
             break
+        # Mark the new node with lowest distance as visited
         nodeIdWithLowestDist=remaining.index(lowestDist)
         remaining[nodeIdWithLowestDist]=''
+        # Loop over all connections to this last visited node
         for distance,iter in zip(g[nodeIdWithLowestDist],range(len(result))):
+            # If the distances through this node are less than what we know
             if distance+lowestDist < result[iter]:
+                # Update the result list and remaining nodes to visit list
                 result[iter]=distance+lowestDist
                 assert(remaining[iter]!='')
                 remaining[iter]=distance+lowestDist
